@@ -1,9 +1,12 @@
 class Piece:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, color, icon):
+        self.color = color
+        self.icon = icon
 
 
 
-class Pawn:
-    def __init__(self, name):
-        super().__init__(name)
+class Pawn(Piece):
+    def __init__(self, color):
+        icon = "♟" if color == "White" else "♙"
+        super().__init__(color, icon)
+        

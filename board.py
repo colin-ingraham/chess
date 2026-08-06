@@ -12,14 +12,31 @@ class Board:
             x += 1
             color ^= 1
              
-        self.print_board()
-
+        
     def print_board(self):
         for row in self.board:
-            print(row)
+            print("|", end="")
+            for tile in row:
+                if tile.piece != None: 
+                    print(tile.piece.icon + "  ", end="")
+                else:
+                    print(".  ", end="")
+            print("|")
 
 
-            
+    def print_default_board(self):
+
+        b = """ 
+            8 | ♜  ♞  ♝  ♛  ♚  ♝  ♞  ♜ |
+            7 | ♟  ♟  ♟  ♟  ♟  ♟  ♟  ♟ |
+            6 | .  .  .  .  .  .  .  . |
+            5 | .  .  .  .  .  .  .  . |
+            4 | .  .  .  .  .  .  .  . |
+            3 | .  .  .  .  .  .  .  . |
+            2 | ♙  ♙  ♙  ♙  ♙  ♙  ♙  ♙ |
+            1 | ♖  ♘  ♗  ♕  ♔  ♗  ♘  ♖ |
+        """
+        print(b)
 
 
 class Tile:
@@ -27,3 +44,10 @@ class Tile:
         self.color = color
         self.x = x
         self.y = y
+        self.piece = None
+
+    def add_piece(self, piece):
+        self.piece = piece
+
+    def remove_piece(self, piece):
+        self.piece = None

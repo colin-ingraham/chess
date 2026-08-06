@@ -1,3 +1,3 @@
-from board import *
+from game import Game
 
-board = Board()
+game = Game()
