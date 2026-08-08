@@ -2,7 +2,7 @@ class Board:
     def __init__(self):
         self.board = [[] for _ in range(8)]
         file = 'a'
-        rank = 8
+        rank = 9
         y = -1
         color = 1 # White is 1, Black is 0
         for i in range(64):
@@ -14,7 +14,13 @@ class Board:
             self.board[y].append(Tile("White" if color == 1 else "Black", file, rank))
             file = chr(ord(file) + 1)
             color ^= 1
-        
+
+    def get_tile(self, file, rank):
+        x = ord(file) - 97
+        y = (rank - 8) * - 1
+        #print(f"Accessing board position ({x},{y})")
+        return self.board[y][x]
+
     def print_board(self):
         i = 8
         print("   ────────────────────────")
@@ -45,6 +51,4 @@ class Tile:
 
     def remove_piece(self):
         self.piece = None
-
-    def get_piece(self, piece):
-        return piece
+    

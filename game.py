@@ -15,31 +15,30 @@ class Game:
     def game_loop(self):
         while not self.game_over:
             move = input("\nNext Move (White) :: ")
-            self.move_piece(move)
-            time.sleep(1)
+            self.parse_move(move)
+            time.sleep(0.25)
             self.board.print_board()
 
-    def move_piece(self, move):
-        if self.validate_move(move):
-            if len(move) == 2: # Simple pawn movement
-                file = move[0]
-                rank = move[1]
+    def parse_move(self, move):
+        if len(move) == 2: # Simple pawn movement
+            target_tile = self.board.get_tile(move[0], int(move[1]))
+        
+            for piece in self.pieces:
+                if piece.color == "White" and isinstance(piece, Pawn) and piece.file == target_tile.file:
+                    standing_tile = self.board.get_tile(target_tile.file, piece.rank)
+                    break
 
-                for piece in self.pieces:
-                    if piece.color == "White" and isinstance(piece, Pawn) and piece.file == file:
-                        old_rank = piece.rank
-                        x = ord(piece.file) - 97
-                        y = (old_rank - 8) * - 1
-                        self.board.board[y][x].remove_piece()
-                        break
-    
-                # Add piece to new tile
-                x = ord(file) - 97
-                y = (int(rank) - 8) * -1
-                new_tile = self.board.board[y][x]
-                new_tile.add_piece(piece)
+        self.move_piece(standing_tile, target_tile)
 
-            #TODO Need to update piece rank/file
+    def move_piece(self, standing_tile, target_tile):
+        #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
+        piece = standing_tile.piece
+        standing_tile.remove_piece()
+        target_tile.add_piece(piece)
+        piece.update_position(target_tile.file, target_tile.rank)
+
+
+        
 
 
 

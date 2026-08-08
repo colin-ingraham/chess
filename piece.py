@@ -5,6 +5,10 @@ class Piece:
         self.file = file
         self.rank = rank
 
+    def update_position(self, file, rank):
+        self.file = file
+        self.rank = rank
+
 class Pawn(Piece):
     def __init__(self, color, file, rank):
         icon = "♟" if color == "White" else "♙"
