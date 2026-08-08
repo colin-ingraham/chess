@@ -1,40 +1,38 @@
 class Piece:
-    def __init__(self, color, icon, file, rank):
+    def __init__(self, color, icon, tile):
         self.color = color
         self.icon = icon
-        self.file = file
-        self.rank = rank
+        self.tile
 
-    def update_position(self, file, rank):
-        self.file = file
-        self.rank = rank
+    def update_position(self, tile):
+        self.tile = tile
 
 class Pawn(Piece):
-    def __init__(self, color, file, rank):
+    def __init__(self, color, tile):
         icon = "♟" if color == "White" else "♙"
-        super().__init__(color, icon, file, rank)
+        super().__init__(color, icon, tile)
 
 class Knight(Piece):
-    def __init__(self, color, file, rank):
+    def __init__(self, color, tile):
         icon = "♞" if color == "White" else "♘"
-        super().__init__(color, icon, file, rank)
+        super().__init__(color, icon, tile)
 
 class Rook(Piece):
-    def __init__(self, color, file, rank):
+    def __init__(self, color, tile):
         icon = "♜" if color == "White" else "♖"
-        super().__init__(color, icon, file, rank)
+        super().__init__(color, icon, tile)
 
 class Bishop(Piece):
-    def __init__(self, color, file, rank):
+    def __init__(self, color, tile):
         icon = "♝" if color == "White" else "♗"
-        super().__init__(color, icon, file, rank)
+        super().__init__(color, icon, tile)
 
 class Queen(Piece):
-    def __init__(self, color, file, rank):
+    def __init__(self, color, tile):
         icon = "♛" if color == "White" else "♕"
-        super().__init__(color, icon, file, rank)
+        super().__init__(color, icon, tile)
 
 class King(Piece):
-    def __init__(self, color, file, rank):
+    def __init__(self, color, tile):
         icon = "♚" if color == "White" else "♔"
-        super().__init__(color, icon, file, rank)
+        super().__init__(color, icon, tile)
