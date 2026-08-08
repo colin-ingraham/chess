@@ -3,7 +3,10 @@ from piece import *
 import time
 
 class Game:
-    def __init__(self):
+    def __init__(self, player1, player2):
+        self.player1 = player1
+        self.player2 = player2
+        self.current_player = self.player1
         self.game_over = False
         self.board = Board()
         self.pieces = []
@@ -14,17 +17,18 @@ class Game:
 
     def game_loop(self):
         while not self.game_over:
-            move = input("\nNext Move (White) :: ")
+            move = input(f"\nNext Move ({self.current_player.color}) :: ")
             self.parse_move(move)
             time.sleep(0.25)
             self.board.print_board()
+            self.current_player = self.player1 if self.player1 != self.current_player else self.player2
 
     def parse_move(self, move):
         if len(move) == 2: # Simple pawn movement
             target_tile = self.board.get_tile(move[0], int(move[1]))
         
             for piece in self.pieces:
-                if piece.color == "White" and isinstance(piece, Pawn) and piece.file == target_tile.file:
+                if piece.color == self.current_player.color and isinstance(piece, Pawn) and piece.file == target_tile.file:
                     standing_tile = self.board.get_tile(target_tile.file, piece.rank)
                     break
 
