@@ -2,7 +2,7 @@ class Piece:
     def __init__(self, color, icon, tile):
         self.color = color
         self.icon = icon
-        self.tile
+        self.tile = tile
 
     def update_position(self, tile):
         self.tile = tile
