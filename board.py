@@ -19,6 +19,10 @@ class Board:
         x = ord(file) - 97
         y = (rank - 8) * - 1
         #print(f"Accessing board position ({x},{y})")
+        if x < 0 or x > 7:
+            return None
+        if y < 0 or y > 7:
+            return None
         return self.board[y][x]
 
     def print_board(self):
@@ -51,4 +55,16 @@ class Tile:
 
     def remove_piece(self):
         self.piece = None
+
+    def left_file(self):
+        if self.file == 'a':
+            return None
+        else:
+            return chr(ord(self.file) - 1)
+
+    def right_file(self):
+        if self.file == 'h':
+            return None
+        else:
+            return chr(ord(self.file) + 1)
     

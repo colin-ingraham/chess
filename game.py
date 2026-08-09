@@ -24,14 +24,14 @@ class Game:
                 self.current_player = self.player1 if self.player1 != self.current_player else self.player2
 
     def parse_move(self, move):
-        capture_attempt = False
-        if len(move) == 2: # Simple pawn movement
-            piece_type = "p"
         target_tile = self.board.get_tile(move[0], int(move[1]))
+        standing_tile = None
+        if len(move) == 2: # Simple pawn movement
+            for piece in self.pieces:
+                if isinstance(piece, Pawn) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
+                    standing_tile = piece.tile
 
-        moving_piece = self.find_and_validate_piece(target_tile, capture_attempt, piece_type)
-        if moving_piece:
-            standing_tile = moving_piece.tile
+        if standing_tile:
             self.move_piece(standing_tile, target_tile)
             return True
         else:
@@ -41,37 +41,10 @@ class Game:
     def move_piece(self, standing_tile, target_tile):
         #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
         piece = standing_tile.piece
-        standing_tile.remove_piece()
-        target_tile.add_piece(piece)
-        piece.update_position(target_tile)
-
-    def find_and_validate_piece(self, target_tile, capture_attempt, piece_type):
-        
-        if target_tile.piece: # Piece already on target_tile:
-            if target_tile.piece.color == self.current_player.color: # Ally piece on tile
-                return None
-            else: # Enemy piece on tile
-                if not capture_attempt:
-                    return None
-                # TODO capturing
-        else:
-            if piece_type == 'p':
-                if target_tile.rank == 4 and self.current_player.color == "White": # Check for opening double movement
-                    if isinstance(self.board.get_tile(target_tile.file, target_tile.rank - 1).piece, Pawn): 
-                        return self.board.get_tile(target_tile.file, 3).piece
-                    else:
-                        return self.board.get_tile(target_tile.file, 2).piece
-                elif target_tile.rank == 5 and self.current_player.color == "Black": # Check for opening double movement
-                    if isinstance(self.board.get_tile(target_tile.file, target_tile.rank + 1).piece, Pawn): 
-                        return self.board.get_tile(target_tile.file, 6).piece
-                    else:
-                        return self.board.get_tile(target_tile.file, 7).piece
-                else:
-                    if isinstance(self.board.get_tile(target_tile.file, target_tile.rank - 1).piece, Pawn):
-                        return self.board.get_tile(target_tile.file, target_tile.rank - 1).piece
-
-                
-
+        if target_tile in piece.possible_moves(self.board):
+            standing_tile.remove_piece()
+            target_tile.add_piece(piece)
+            piece.update_position(target_tile)
 
             
     def setup_pieces(self):
