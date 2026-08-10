@@ -10,9 +10,11 @@ class Game:
         self.game_over = False
         self.board = Board()
         self.pieces = []
+        self.graveyard = []
         self.setup_pieces()
-        self.board.print_board()
+        self.board.print_board(self.graveyard, self.player1, self.player2)
         self.game_loop()
+
 
 
     def game_loop(self):
@@ -20,7 +22,7 @@ class Game:
             move = input(f"\nNext Move ({self.current_player.color}) :: ")
             if self.parse_move(move):
                 time.sleep(0.25)
-                self.board.print_board()
+                self.board.print_board(self.graveyard, self.player1, self.player2)
                 self.current_player = self.player1 if self.player1 != self.current_player else self.player2
 
     def parse_move(self, move):
@@ -43,10 +45,16 @@ class Game:
         piece = standing_tile.piece
         if target_tile in piece.possible_moves(self.board):
             standing_tile.remove_piece()
+            if target_tile.piece != None: # Piece is killed
+                self.destroy_piece(target_tile.piece)
             target_tile.add_piece(piece)
             piece.update_position(target_tile)
 
-            
+    def destroy_piece(self, piece):
+        self.pieces.remove(piece)
+        piece.tile = None
+        self.graveyard.append(piece)
+
     def setup_pieces(self):
         
         # Setup Opponent Pawns:

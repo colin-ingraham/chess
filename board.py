@@ -25,7 +25,40 @@ class Board:
             return None
         return self.board[y][x]
 
-    def print_board(self):
+    def sort_graveyard(self, graveyard):
+        whites = []
+        blacks = []
+        print_whites = []
+        print_blacks = []
+        for piece in graveyard:
+            if piece.color == "White":
+                whites.append(piece)
+                print_whites.append(piece.icon)
+            else:
+                blacks.append(piece)
+                print_blacks.append(piece.icon)
+        return whites, blacks, print_whites, print_blacks
+
+    def calculate_diff(self, whites, blacks):
+        scores = {"Pawn": 1, "Knight": 3, "Bishop": 3, "Rook": 6, "Queen": 9}
+        w_score = 0
+        b_score = 0
+        for piece in whites:
+            w_score += scores[piece.name]
+        for piece in blacks:
+            b_score += scores[piece.name]
+        if w_score > b_score:
+            winning = "Black"
+        elif w_score < b_score:
+            winning = "White"
+        else:
+            winning = "None"
+        return abs(w_score - b_score), winning
+        
+
+    def print_board(self, graveyard, p1, p2):
+        whites, blacks, print_whites, print_blacks = self.sort_graveyard(graveyard)
+        diff, winning = self.calculate_diff(whites, blacks)
         i = 8
         print("   ────────────────────────")
         for row in self.board:
@@ -36,7 +69,29 @@ class Board:
                     print(tile.piece.icon + "  ", end="")
                 else:
                     print(".  ", end="")
-            print("|")
+            
+
+            if i == 6:
+                print("|", end="")
+                black = p1 if p1.color == "Black" else p2
+                print(f"   {black.name}: ", end=" ")
+                print("".join(print_whites), end="")
+                if winning == "Black":
+                    print(f" (+{diff})")
+                else:
+                    print("")
+            elif i == 3:
+                print("|", end="")
+                white = p1 if p1.color == "White" else p2
+                print(f"   {white.name}: ", end=" ")
+                print("".join(print_blacks), end="")
+                if winning == "White":
+                    print(f" (+{diff})")
+                else:
+                    print("")
+            else:
+                print("|")
+
             i -= 1
         print("   ────────────────────────")
         print("    a  b  c  d  e  f  g  h ")

@@ -1,9 +1,10 @@
 class Piece:
-    def __init__(self, color, icon, tile):
+    def __init__(self, color, icon, tile, name):
         self.color = color
         self.icon = icon
         self.tile = tile
         self.past_tiles = [tile]
+        self.name = name
 
     def update_position(self, tile):
         self.past_tiles.append(self.tile)
@@ -16,7 +17,7 @@ class Pawn(Piece):
     def __init__(self, color, tile):
         icon = "♟" if color == "White" else "♙"
         self.direction = 1 if color == "White" else -1
-        super().__init__(color, icon, tile)
+        super().__init__(color, icon, tile, "Pawn")
 
     def possible_moves(self, board):
         moves = []
@@ -39,24 +40,24 @@ class Pawn(Piece):
 class Knight(Piece):
     def __init__(self, color, tile):
         icon = "♞" if color == "White" else "♘"
-        super().__init__(color, icon, tile)
+        super().__init__(color, icon, tile, "Knight")
 
 class Rook(Piece):
     def __init__(self, color, tile):
         icon = "♜" if color == "White" else "♖"
-        super().__init__(color, icon, tile)
+        super().__init__(color, icon, tile, "Rook")
 
 class Bishop(Piece):
     def __init__(self, color, tile):
         icon = "♝" if color == "White" else "♗"
-        super().__init__(color, icon, tile)
+        super().__init__(color, icon, tile, "Bishop")
 
 class Queen(Piece):
     def __init__(self, color, tile):
         icon = "♛" if color == "White" else "♕"
-        super().__init__(color, icon, tile)
+        super().__init__(color, icon, tile, "Queen")
 
 class King(Piece):
     def __init__(self, color, tile):
         icon = "♚" if color == "White" else "♔"
-        super().__init__(color, icon, tile)
+        super().__init__(color, icon, tile, "King")
