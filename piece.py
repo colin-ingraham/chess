@@ -12,6 +12,10 @@ class Piece:
 
     def possible_moves(self, board):
         return []
+    
+    def add_move(self, moves, tile): # Works for all movements except for generic pawn movements
+        if tile != None and (tile.piece == None or tile.piece.color != self.color):
+            moves.append(tile)
 
 class Pawn(Piece):
     def __init__(self, color, tile):
@@ -19,7 +23,7 @@ class Pawn(Piece):
         self.direction = 1 if color == "White" else -1
         super().__init__(color, icon, tile, "Pawn")
 
-    def possible_moves(self, board, current_player):
+    def possible_moves(self, board):
         moves = []
         # Generic pawn movements
         if board.get_tile(self.tile.file, self.tile.rank + (1 * self.direction)).piece == None: 
@@ -27,12 +31,8 @@ class Pawn(Piece):
             if len(self.past_tiles) == 1 and board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)).piece == None:
                 moves.append(board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)))
         # Capture movements
-        if self.tile.left_file() != None:
-            if board.get_tile(self.tile.left_file(), self.tile.rank + (1 * self.direction)).piece and board.get_tile(self.tile.left_file(), self.tile.rank + (1 * self.direction)).piece.color != current_player.color: 
-                moves.append(board.get_tile(self.tile.left_file(), self.tile.rank + (1 * self.direction)))
-        if self.tile.right_file() != None:
-            if board.get_tile(self.tile.right_file(), self.tile.rank + (1 * self.direction)).piece and board.get_tile(self.tile.right_file(), self.tile.rank + (1 * self.direction)).piece.color != current_player.color: 
-                moves.append(board.get_tile(self.tile.right_file(), self.tile.rank + (1 * self.direction)))
+        self.add_move(board.find_tile(self.tile, -1, (1 * self.direction)))
+        self.add_move(board.find_tile(self.tile, 1, (1 * self.direction)))
         return moves
         
 
@@ -42,11 +42,16 @@ class Knight(Piece):
         icon = "♞" if color == "White" else "♘"
         super().__init__(color, icon, tile, "Knight")
 
-    def possible_moves(self, board, current_player):
+    def possible_moves(self, board):
         moves = []
-        if self.tile.left_file() != None:
-            if self.tile.rank - 2 > 1 and (board.get_tile(self.tile.left_file(), self.tile.rank - 2).piece == None or board.get_tile(self.tile.left_file(), self.tile.rank - 2).piece.color != current_player.color):
-                moves.append(board.get_tile(self.tile.left_file(), self.tile.rank - 2))
+        self.add_move(board.find_tile(self.tile, -1, 2))
+        self.add_move(board.find_tile(self.tile, -1, -2))
+        self.add_move(board.find_tile(self.tile, -2, 1))
+        self.add_move(board.find_tile(self.tile, -2, -1))
+        self.add_move(board.find_tile(self.tile, 1, 2))
+        self.add_move(board.find_tile(self.tile, 1, -2))
+        self.add_move(board.find_tile(self.tile, 2, 1))
+        self.add_move(board.find_tile(self.tile, 2, -1))
         return moves
 
 

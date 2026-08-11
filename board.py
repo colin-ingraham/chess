@@ -25,6 +25,17 @@ class Board:
             return None
         return self.board[y][x]
 
+    # Takes a current tile and returns a new tile with a specified shift. Used for piece movements.
+    def find_tile(self, current, shift_right, shift_up):
+        new_rank = current.rank + shift_up
+        if new_rank < 1 or new_rank > 8:
+            return None
+        ord_file = ord(current.file) + shift_right
+        if ord_file < 97 or ord_file > 104:
+            return None
+        new_file = chr(ord_file)
+        return self.get_tile(new_file, new_rank)
+
     def sort_graveyard(self, graveyard):
         whites = []
         blacks = []
@@ -122,4 +133,6 @@ class Tile:
             return None
         else:
             return chr(ord(self.file) + 1)
+
+    
     
