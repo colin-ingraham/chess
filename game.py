@@ -26,12 +26,19 @@ class Game:
                 self.current_player = self.player1 if self.player1 != self.current_player else self.player2
 
     def parse_move(self, move):
-        target_tile = self.board.get_tile(move[0], int(move[1]))
         standing_tile = None
         if len(move) == 2: # Simple pawn movement
+            target_tile = self.board.get_tile(move[0], int(move[1]))
             for piece in self.pieces:
-                if isinstance(piece, Pawn) and target_tile in piece.possible_moves(self.board, self.current_player) and self.current_player.color == piece.color:
+                if isinstance(piece, Pawn) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
                     standing_tile = piece.tile
+        elif len(move) == 3:
+            target_tile = self.board.get_tile(move[1], int(move[2]))
+            if move[0] == 'N':
+                for piece in self.pieces:
+                    if isinstance(piece, Knight) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
+                        standing_tile = piece.tile
+
 
         if standing_tile:
             self.move_piece(standing_tile, target_tile)
@@ -43,7 +50,7 @@ class Game:
     def move_piece(self, standing_tile, target_tile):
         #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
         piece = standing_tile.piece
-        if target_tile in piece.possible_moves(self.board, self.current_player):
+        if target_tile in piece.possible_moves(self.board):
             standing_tile.remove_piece()
             if target_tile.piece != None: # Piece is killed
                 self.destroy_piece(target_tile.piece)

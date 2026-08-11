@@ -13,7 +13,7 @@ class Piece:
     def possible_moves(self, board):
         return []
     
-    def add_move(self, moves, tile): # Works for all movements except for generic pawn movements
+    def add_move(self, moves, tile): # Works for all movements except for pawn movements
         if tile != None and (tile.piece == None or tile.piece.color != self.color):
             moves.append(tile)
 
@@ -31,8 +31,12 @@ class Pawn(Piece):
             if len(self.past_tiles) == 1 and board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)).piece == None:
                 moves.append(board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)))
         # Capture movements
-        self.add_move(board.find_tile(self.tile, -1, (1 * self.direction)))
-        self.add_move(board.find_tile(self.tile, 1, (1 * self.direction)))
+        tile = board.find_tile(self.tile, -1, (1 * self.direction))
+        if tile != None and (tile.piece != None and tile.piece.color != self.color):
+            moves.append(tile)
+        tile = board.find_tile(self.tile, 1, (1 * self.direction))
+        if tile != None and (tile.piece != None and tile.piece.color != self.color):
+            moves.append(tile)
         return moves
         
 
@@ -44,14 +48,14 @@ class Knight(Piece):
 
     def possible_moves(self, board):
         moves = []
-        self.add_move(board.find_tile(self.tile, -1, 2))
-        self.add_move(board.find_tile(self.tile, -1, -2))
-        self.add_move(board.find_tile(self.tile, -2, 1))
-        self.add_move(board.find_tile(self.tile, -2, -1))
-        self.add_move(board.find_tile(self.tile, 1, 2))
-        self.add_move(board.find_tile(self.tile, 1, -2))
-        self.add_move(board.find_tile(self.tile, 2, 1))
-        self.add_move(board.find_tile(self.tile, 2, -1))
+        self.add_move(moves, board.find_tile(self.tile, -1, 2))
+        self.add_move(moves, board.find_tile(self.tile, -1, -2))
+        self.add_move(moves, board.find_tile(self.tile, -2, 1))
+        self.add_move(moves, board.find_tile(self.tile, -2, -1))
+        self.add_move(moves, board.find_tile(self.tile, 1, 2))
+        self.add_move(moves, board.find_tile(self.tile, 1, -2))
+        self.add_move(moves, board.find_tile(self.tile, 2, 1))
+        self.add_move(moves, board.find_tile(self.tile, 2, -1))
         return moves
 
 

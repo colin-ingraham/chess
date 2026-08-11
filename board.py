@@ -86,7 +86,7 @@ class Board:
                 print("|", end="")
                 black = p1 if p1.color == "Black" else p2
                 print(f"   {black.name}: ", end=" ")
-                print("".join(print_whites), end="")
+                print(" ".join(print_whites), end="")
                 if winning == "Black":
                     print(f" (+{diff})")
                 else:
@@ -95,7 +95,7 @@ class Board:
                 print("|", end="")
                 white = p1 if p1.color == "White" else p2
                 print(f"   {white.name}: ", end=" ")
-                print("".join(print_blacks), end="")
+                print(" ".join(print_blacks), end="")
                 if winning == "White":
                     print(f" (+{diff})")
                 else:
