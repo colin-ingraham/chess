@@ -30,7 +30,7 @@ class Game:
         standing_tile = None
         if len(move) == 2: # Simple pawn movement
             for piece in self.pieces:
-                if isinstance(piece, Pawn) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
+                if isinstance(piece, Pawn) and target_tile in piece.possible_moves(self.board, self.current_player) and self.current_player.color == piece.color:
                     standing_tile = piece.tile
 
         if standing_tile:
@@ -43,7 +43,7 @@ class Game:
     def move_piece(self, standing_tile, target_tile):
         #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
         piece = standing_tile.piece
-        if target_tile in piece.possible_moves(self.board):
+        if target_tile in piece.possible_moves(self.board, self.current_player):
             standing_tile.remove_piece()
             if target_tile.piece != None: # Piece is killed
                 self.destroy_piece(target_tile.piece)

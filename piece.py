@@ -19,7 +19,7 @@ class Pawn(Piece):
         self.direction = 1 if color == "White" else -1
         super().__init__(color, icon, tile, "Pawn")
 
-    def possible_moves(self, board):
+    def possible_moves(self, board, current_player):
         moves = []
         # Generic pawn movements
         if board.get_tile(self.tile.file, self.tile.rank + (1 * self.direction)).piece == None: 
@@ -28,10 +28,10 @@ class Pawn(Piece):
                 moves.append(board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)))
         # Capture movements
         if self.tile.left_file() != None:
-            if board.get_tile(self.tile.left_file(), self.tile.rank + (1 * self.direction)).piece: 
+            if board.get_tile(self.tile.left_file(), self.tile.rank + (1 * self.direction)).piece and board.get_tile(self.tile.left_file(), self.tile.rank + (1 * self.direction)).piece.color != current_player.color: 
                 moves.append(board.get_tile(self.tile.left_file(), self.tile.rank + (1 * self.direction)))
         if self.tile.right_file() != None:
-            if board.get_tile(self.tile.right_file(), self.tile.rank + (1 * self.direction)).piece: 
+            if board.get_tile(self.tile.right_file(), self.tile.rank + (1 * self.direction)).piece and board.get_tile(self.tile.right_file(), self.tile.rank + (1 * self.direction)).piece.color != current_player.color: 
                 moves.append(board.get_tile(self.tile.right_file(), self.tile.rank + (1 * self.direction)))
         return moves
         
@@ -41,6 +41,14 @@ class Knight(Piece):
     def __init__(self, color, tile):
         icon = "♞" if color == "White" else "♘"
         super().__init__(color, icon, tile, "Knight")
+
+    def possible_moves(self, board, current_player):
+        moves = []
+        if self.tile.left_file() != None:
+            if self.tile.rank - 2 > 1 and (board.get_tile(self.tile.left_file(), self.tile.rank - 2).piece == None or board.get_tile(self.tile.left_file(), self.tile.rank - 2).piece.color != current_player.color):
+                moves.append(board.get_tile(self.tile.left_file(), self.tile.rank - 2))
+        return moves
+
 
 class Rook(Piece):
     def __init__(self, color, tile):
