@@ -46,6 +46,14 @@ class Game:
                 for piece in self.pieces:
                     if isinstance(piece, Bishop) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
                         standing_tile = piece.tile
+            elif move[0] == "Q":
+                for piece in self.pieces:
+                    if isinstance(piece, Queen) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
+                        standing_tile = piece.tile
+            elif move[0] == "K":
+                for piece in self.pieces:
+                    if isinstance(piece, King) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
+                        standing_tile = piece.tile
 
 
         if standing_tile:

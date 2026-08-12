@@ -119,6 +119,12 @@ class Queen(Piece):
         icon = "♛" if color == "White" else "♕"
         super().__init__(color, icon, tile, "Queen")
 
+    def possible_moves(self, board):
+        moves = []
+        moves += Rook.possible_moves(self, board)
+        moves += Bishop.possible_moves(self, board)
+        return moves
+
 class King(Piece):
     def __init__(self, color, tile):
         icon = "♚" if color == "White" else "♔"
