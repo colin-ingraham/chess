@@ -129,3 +129,15 @@ class King(Piece):
     def __init__(self, color, tile):
         icon = "♚" if color == "White" else "♔"
         super().__init__(color, icon, tile, "King")
+
+    def possible_moves(self, board):
+        moves = []
+        self.add_move(moves, board.find_tile(self.tile, 0, 1))
+        self.add_move(moves, board.find_tile(self.tile, 1, 1))
+        self.add_move(moves, board.find_tile(self.tile, 1, 0))
+        self.add_move(moves, board.find_tile(self.tile, 1, -1))
+        self.add_move(moves, board.find_tile(self.tile, 0, -1))
+        self.add_move(moves, board.find_tile(self.tile, -1, -1))
+        self.add_move(moves, board.find_tile(self.tile, -1, 0))
+        self.add_move(moves, board.find_tile(self.tile, -1, 1))
+        return moves
