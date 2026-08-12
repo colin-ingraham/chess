@@ -64,10 +64,55 @@ class Rook(Piece):
         icon = "♜" if color == "White" else "♖"
         super().__init__(color, icon, tile, "Rook")
 
+    def possible_moves(self, board):
+        moves = []
+        shifts = [[0, 1, 1], [0, -1, 1], [1, 0, 0], [-1, 0, 0]]
+        for shift in shifts:
+            tile = board.find_tile(self.tile, shift[0], shift[1])
+            while tile != None:
+                if tile.piece != None:
+                    if tile.piece.color != self.color:
+                        self.add_move(moves, tile)
+                        break
+                self.add_move(moves, tile)
+                if shift[shift[2]] > 0:
+                    shift[shift[2]] += 1
+                else:
+                    shift[shift[2]] -= 1
+                tile = board.find_tile(self.tile, shift[0], shift[1])
+        return moves
+
+            
+
+            
+
+
 class Bishop(Piece):
     def __init__(self, color, tile):
         icon = "♝" if color == "White" else "♗"
         super().__init__(color, icon, tile, "Bishop")
+
+    def possible_moves(self, board): 
+        moves = []
+        shifts = [[1, 1], [-1, 1], [1, -1], [-1, -1]]
+        for shift in shifts:
+            tile = board.find_tile(self.tile, shift[0], shift[1])
+            while tile != None:
+                if tile.piece != None:
+                    if tile.piece.color != self.color:
+                        self.add_move(moves, tile)
+                        break
+                self.add_move(moves, tile)
+                if shift[0] > 0:
+                    shift[0] += 1
+                else:
+                    shift[0] -= 1
+                if shift[1] > 0:
+                    shift[1] += 1
+                else:
+                    shift[1] -= 1
+                tile = board.find_tile(self.tile, shift[0], shift[1])
+        return moves
 
 class Queen(Piece):
     def __init__(self, color, tile):
