@@ -74,6 +74,8 @@ class Rook(Piece):
                     if tile.piece.color != self.color:
                         self.add_move(moves, tile)
                         break
+                    else:
+                        break
                 self.add_move(moves, tile)
                 if shift[shift[2]] > 0:
                     shift[shift[2]] += 1
@@ -101,6 +103,8 @@ class Bishop(Piece):
                 if tile.piece != None:
                     if tile.piece.color != self.color:
                         self.add_move(moves, tile)
+                        break
+                    else:
                         break
                 self.add_move(moves, tile)
                 if shift[0] > 0:

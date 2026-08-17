@@ -19,7 +19,10 @@ class Game:
 
     def game_loop(self):
         while not self.game_over:
-            move = input(f"\nNext Move ({self.current_player.color}) :: ")
+            check_symbol = ""
+            if self.check_king():
+                check_symbol = "!X!"
+            move = input(f"\nNext Move ({self.current_player.color}) {check_symbol} :: ")
             if self.parse_move(move):
                 time.sleep(0.25)
                 self.board.print_board(self.graveyard, self.player1, self.player2)
@@ -55,10 +58,14 @@ class Game:
                     if isinstance(piece, King) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
                         standing_tile = piece.tile
 
-
         if standing_tile:
             self.move_piece(standing_tile, target_tile)
-            return True
+            if self.check_king(): # King is still in check after move
+                print("Still in check, move not available. Please try again.")
+                self.move_piece(target_tile, standing_tile)
+                return False
+            else:
+                return True
         else:
             print("Move not available. Please try again.")
             return False
@@ -77,6 +84,22 @@ class Game:
         self.pieces.remove(piece)
         piece.tile = None
         self.graveyard.append(piece)
+
+
+    def check_king(self):
+        opponent_pieces = []
+        king = None
+        for piece in self.pieces:
+            if piece.color != self.current_player.color:
+                opponent_pieces.append(piece)
+            elif piece.name == "King":
+                king = piece
+
+        for piece in opponent_pieces:
+            if king.tile in piece.possible_moves(self.board):
+                return True
+        return False
+
 
     def setup_pieces(self):
         
