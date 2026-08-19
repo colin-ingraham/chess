@@ -10,6 +10,8 @@ class Game:
         self.game_over = False
         self.board = Board()
         self.pieces = []
+        self.whites = []
+        self.blacks = []
         self.graveyard = []
         self.setup_pieces()
         self.board.print_board(self.graveyard, self.player1, self.player2)
@@ -20,13 +22,27 @@ class Game:
     def game_loop(self):
         while not self.game_over:
             check_symbol = ""
-            if self.check_king():
+            in_check = self.is_in_check(self.current_player.color)
+            legal_moves = self.has_any_legal_move(self.current_player.color)
+            if in_check and legal_moves: # Player is in check
                 check_symbol = "!X!"
+            elif in_check and not legal_moves: # Player is in checkmate
+                self.game_over = True
+                print(f"Checkmate! {self.enemy_color(self.current_player.color)} wins!")
+                break
+            elif not in_check and not legal_moves: # Player is in stalemate
+                self.game_over = True
+                print("Stalemate draw! Game over.")
+                break
+            
             move = input(f"\nNext Move ({self.current_player.color}) {check_symbol} :: ")
             if self.parse_move(move):
                 time.sleep(0.25)
                 self.board.print_board(self.graveyard, self.player1, self.player2)
                 self.current_player = self.player1 if self.player1 != self.current_player else self.player2
+            else:
+                print("Move not available. Please try again.")
+
 
     def parse_move(self, move):
         standing_tile = None
@@ -59,48 +75,85 @@ class Game:
                         standing_tile = piece.tile
 
         if standing_tile:
-            self.move_piece(standing_tile, target_tile)
-            if self.check_king(): # King is still in check after move
-                print("Still in check, move not available. Please try again.")
-                self.move_piece(target_tile, standing_tile)
+            movement = self.move_piece(standing_tile, target_tile)
+            if self.is_in_check(self.current_player.color): # King is still in check after move
+                self.undo_move(movement)
                 return False
             else:
                 return True
         else:
-            print("Move not available. Please try again.")
             return False
 
+        
+            
     def move_piece(self, standing_tile, target_tile):
         #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
         piece = standing_tile.piece
-        if target_tile in piece.possible_moves(self.board):
-            standing_tile.remove_piece()
-            if target_tile.piece != None: # Piece is killed
-                self.destroy_piece(target_tile.piece)
-            target_tile.add_piece(piece)
-            piece.update_position(target_tile)
+        standing_tile.remove_piece()
+        if target_tile.piece != None: # Opponent piece is killed
+            targeted_piece = target_tile.piece
+            t_index = self.pieces.index(targeted_piece)
+            self.destroy_piece(target_tile.piece)
+        else:
+            targeted_piece = None
+            t_index = None
+        target_tile.add_piece(piece)
+        piece.update_position(target_tile)
+        return {"piece": piece, "st": standing_tile, "t_piece": targeted_piece, "tt": target_tile, "t_index": t_index}
 
+
+    def undo_move(self, move):
+        """ This function reverts the movement previously made with the move_piece function"""
+        move["st"].add_piece(move["piece"])
+        move["piece"].tile = move["st"]
+        move["piece"].past_tiles.pop()
+        move["tt"].add_piece(move["t_piece"])
+        if move["t_piece"] != None:
+            move["t_piece"].tile = move["tt"]
+            self.pieces.insert(move["t_index"], move["t_piece"])
+            self.graveyard.remove(move["t_piece"])
+
+    
     def destroy_piece(self, piece):
         self.pieces.remove(piece)
         piece.tile = None
         self.graveyard.append(piece)
 
+    # --- Checkmate Helper Functions --- #
 
-    def check_king(self):
-        opponent_pieces = []
-        king = None
+    def is_attacked(self, tile, by_color):
+        """ This function determines if a given tile is being attacked by a specific color."""
         for piece in self.pieces:
-            if piece.color != self.current_player.color:
-                opponent_pieces.append(piece)
-            elif piece.name == "King":
-                king = piece
-
-        for piece in opponent_pieces:
-            if king.tile in piece.possible_moves(self.board):
-                return True
+            if piece.color == by_color:
+                if tile in piece.possible_moves(self.board):
+                    return True
         return False
 
+    def is_in_check(self, color):
+        """ This function determines if a given color is in check."""
+        king = None
+        for piece in self.pieces:
+            if piece.name == "King" and piece.color == color:
+                king = piece
+        return self.is_attacked(king.tile, self.enemy_color(color))
 
+    def has_any_legal_move(self, color):
+        """ This function determines if a given color has the ability to make a move that doesn't leave their king in check. Determines checkmate"""
+        for piece in self.pieces:
+            if piece.color == color:
+                for target in piece.possible_moves(self.board):
+                    record = self.move_piece(piece.tile, target)
+                    king_is_safe = not self.is_in_check(color)
+                    self.undo_move(record)
+                    if king_is_safe: 
+                        return True
+        return False
+
+        
+
+
+    # --- Board Setup --- #
+                                
     def setup_pieces(self):
         
         # Setup Opponent Pawns:
@@ -128,4 +181,8 @@ class Game:
         self.pieces.append(self.board.board[7][3].add_piece(Queen("White", self.board.get_tile('d', 1))))
         self.pieces.append(self.board.board[7][4].add_piece(King("White", self.board.get_tile('e', 1))))
 
-    
+    def enemy_color(self, color): 
+        if color == "White":
+            return "Black"
+        else:
+            return "White"
