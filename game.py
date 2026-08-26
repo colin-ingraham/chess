@@ -1,5 +1,6 @@
 from board import Board
 from piece import *
+from move import Move
 import time
 
 class Game:
@@ -23,14 +24,14 @@ class Game:
         while not self.game_over:
             check_symbol = ""
             in_check = self.is_in_check(self.current_player.color)
-            legal_moves = self.has_any_legal_move(self.current_player.color)
-            if in_check and legal_moves: # Player is in check
+            legal_moves = self.generate_legal_moves(self.current_player.color)
+            if in_check and len(legal_moves) > 0: # Player is in check
                 check_symbol = "!X!"
-            elif in_check and not legal_moves: # Player is in checkmate
+            elif in_check and len(legal_moves) == 0: # Player is in checkmate
                 self.game_over = True
                 print(f"Checkmate! {self.enemy_color(self.current_player.color)} wins!")
                 break
-            elif not in_check and not legal_moves: # Player is in stalemate
+            elif not in_check and len(legal_moves) == 0: # Player is in stalemate
                 self.game_over = True
                 print("Stalemate draw! Game over.")
                 break
@@ -137,8 +138,9 @@ class Game:
                 king = piece
         return self.is_attacked(king.tile, self.enemy_color(color))
 
-    def has_any_legal_move(self, color):
-        """ This function determines if a given color has the ability to make a move that doesn't leave their king in check. Determines checkmate"""
+    def generate_legal_moves(self, color):
+        """ This function returns the moves that doesn't leave color king in check. Determines checkmate"""
+        legal_moves = []
         for piece in self.pieces:
             if piece.color == color:
                 for target in piece.possible_moves(self.board):
@@ -146,8 +148,8 @@ class Game:
                     king_is_safe = not self.is_in_check(color)
                     self.undo_move(record)
                     if king_is_safe: 
-                        return True
-        return False
+                        legal_moves.append(Move(piece=piece, origin=piece.tile, destination=target, kind="Unknown"))
+        return legal_moves
 
         
 
