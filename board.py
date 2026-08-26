@@ -10,7 +10,6 @@ class Board:
                 y += 1
                 rank -= 1
                 file = 'a'
-                color ^= 1
             self.board[y].append(Tile("White" if color == 1 else "Black", file, rank))
             file = chr(ord(file) + 1)
             color ^= 1
@@ -51,7 +50,7 @@ class Board:
         return whites, blacks, print_whites, print_blacks
 
     def calculate_diff(self, whites, blacks):
-        scores = {"Pawn": 1, "Knight": 3, "Bishop": 3, "Rook": 6, "Queen": 9}
+        scores = {"Pawn": 1, "Knight": 3, "Bishop": 3, "Rook": 5, "Queen": 9}
         w_score = 0
         b_score = 0
         for piece in whites:
