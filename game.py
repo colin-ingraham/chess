@@ -1,6 +1,6 @@
 from board import Board
 from piece import *
-from move import Move
+from move import *
 import time
 
 class Game:
@@ -76,9 +76,9 @@ class Game:
                         standing_tile = piece.tile
 
         if standing_tile:
-            movement = self.move_piece(standing_tile, target_tile)
+            move = self.move_piece(standing_tile, target_tile)
             if self.is_in_check(self.current_player.color): # King is still in check after move
-                self.undo_move(movement)
+                self.undo_move(move)
                 return False
             else:
                 return True
@@ -89,30 +89,30 @@ class Game:
             
     def move_piece(self, standing_tile, target_tile):
         #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
-        piece = standing_tile.piece
-        standing_tile.remove_piece()
-        if target_tile.piece != None: # Opponent piece is killed
-            targeted_piece = target_tile.piece
-            t_index = self.pieces.index(targeted_piece)
-            self.destroy_piece(target_tile.piece)
+        if target_tile.piece:
+            move = Capture(standing_tile.piece, standing_tile, target_tile, "CAPTURE", target_tile.piece, self.pieces.index(target_tile.piece), target_tile)
         else:
-            targeted_piece = None
-            t_index = None
-        target_tile.add_piece(piece)
-        piece.update_position(target_tile)
-        return {"piece": piece, "st": standing_tile, "t_piece": targeted_piece, "tt": target_tile, "t_index": t_index}
+            move = Move(standing_tile.piece, standing_tile, target_tile, "QUIET")
+
+        move.origin.remove_piece()
+        if move.kind == "CAPTURE":
+            self.destroy_piece(move.destination.piece)
+        move.destination.add_piece(move.piece)
+        move.piece.update_position(move.destination)
+        return move
 
 
     def undo_move(self, move):
         """ This function reverts the movement previously made with the move_piece function"""
-        move["st"].add_piece(move["piece"])
-        move["piece"].tile = move["st"]
-        move["piece"].past_tiles.pop()
-        move["tt"].add_piece(move["t_piece"])
-        if move["t_piece"] != None:
-            move["t_piece"].tile = move["tt"]
-            self.pieces.insert(move["t_index"], move["t_piece"])
-            self.graveyard.remove(move["t_piece"])
+
+        move.origin.add_piece(move.piece)
+        move.piece.tile = move.origin
+        move.piece.past_tiles.pop()
+        move.destination.add_piece(move.captured)
+        if move.captured != None: 
+            move.captured.tile = move.destination
+            self.pieces.insert(move.captured_index, move.captured)
+            self.graveyard.remove(move.captured)
 
     
     def destroy_piece(self, piece):
@@ -144,9 +144,9 @@ class Game:
         for piece in self.pieces:
             if piece.color == color:
                 for target in piece.possible_moves(self.board):
-                    record = self.move_piece(piece.tile, target)
+                    move = self.move_piece(piece.tile, target)
                     king_is_safe = not self.is_in_check(color)
-                    self.undo_move(record)
+                    self.undo_move(move)
                     if king_is_safe: 
                         legal_moves.append(Move(piece=piece, origin=piece.tile, destination=target, kind="Unknown"))
         return legal_moves

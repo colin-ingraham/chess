@@ -1,3 +1,4 @@
+from move import *
 class Piece:
     def __init__(self, color, icon, tile, name):
         self.color = color
@@ -12,10 +13,15 @@ class Piece:
 
     def possible_moves(self, board):
         return []
-    
-    def add_move(self, moves, tile): # Works for all movements except for pawn movements
-        if tile != None and (tile.piece == None or tile.piece.color != self.color):
-            moves.append(tile)
+
+    def add_move(self, moves, move): # Works for all movements except pawn movements.
+        if move.destination != None:
+            if move.destination.piece:
+                move.kind = "CAPTURE"
+                moves.append(move)
+            elif move.destination.piece.color != self.color:
+                move.kind = "QUIET"
+                moves.append(move)
 
 class Pawn(Piece):
     def __init__(self, color, tile):
@@ -25,18 +31,24 @@ class Pawn(Piece):
 
     def possible_moves(self, board):
         moves = []
+        origin = board.get_tile(self.tile.file, self.tile.rank)
         # Generic pawn movements
         if board.get_tile(self.tile.file, self.tile.rank + (1 * self.direction)).piece == None: 
-            moves.append(board.get_tile(self.tile.file, self.tile.rank + (1 * self.direction)))
+            destination = board.get_tile(self.tile.file, self.tile.rank + (1 * self.direction))
+            move = Move(piece=self, origin=origin, destination=destination, kind="QUIET")
+            moves.append(move)
             if len(self.past_tiles) == 1 and board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)).piece == None:
-                moves.append(board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)))
+                move = Move(piece=self, origin=origin, destination=board.get_tile(self.tile.file, self.tile.rank + (2 * self.direction)), kind="DOUBLE_PAWN_PUSH")
+                moves.append(move)
         # Capture movements
-        tile = board.find_tile(self.tile, -1, (1 * self.direction))
-        if tile != None and (tile.piece != None and tile.piece.color != self.color):
-            moves.append(tile)
-        tile = board.find_tile(self.tile, 1, (1 * self.direction))
-        if tile != None and (tile.piece != None and tile.piece.color != self.color):
-            moves.append(tile)
+        destination = board.find_tile(self.tile, -1, (1 * self.direction))
+        move = Move(piece=self, origin=origin, destination=destination, kind="CAPTURE")
+        if move.destination != None and (move.destination.piece != None and move.destination.piece.color != self.color):
+            moves.append(move)
+        destination = board.find_tile(self.tile, 1, (1 * self.direction))
+        move = Move(piece=self, origin=origin, destination=destination, kind="CAPTURE")
+        if move.destination != None and (move.destination.piece != None and move.destination.piece.color != self.color):
+            moves.append(move)
         return moves
         
 
@@ -48,14 +60,15 @@ class Knight(Piece):
 
     def possible_moves(self, board):
         moves = []
-        self.add_move(moves, board.find_tile(self.tile, -1, 2))
-        self.add_move(moves, board.find_tile(self.tile, -1, -2))
-        self.add_move(moves, board.find_tile(self.tile, -2, 1))
-        self.add_move(moves, board.find_tile(self.tile, -2, -1))
-        self.add_move(moves, board.find_tile(self.tile, 1, 2))
-        self.add_move(moves, board.find_tile(self.tile, 1, -2))
-        self.add_move(moves, board.find_tile(self.tile, 2, 1))
-        self.add_move(moves, board.find_tile(self.tile, 2, -1))
+        origin = board.get_tile(self.tile.file, self.tile.rank)
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, -1, 2), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, -1, -2), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, -2, 1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, -2, -1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 1, 2), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 1, -2), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 2, 1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 2, -1), kind="UNKNOWN"))
         return moves
 
 
@@ -66,27 +79,24 @@ class Rook(Piece):
 
     def possible_moves(self, board):
         moves = []
+        origin = board.get_tile(self.tile.file, self.tile.rank)
         shifts = [[0, 1, 1], [0, -1, 1], [1, 0, 0], [-1, 0, 0]]
         for shift in shifts:
             tile = board.find_tile(self.tile, shift[0], shift[1])
             while tile != None:
                 if tile.piece != None:
                     if tile.piece.color != self.color:
-                        self.add_move(moves, tile)
+                        self.add_move(moves, Move(self, origin, tile, kind="CAPTURE"))
                         break
                     else:
                         break
-                self.add_move(moves, tile)
+                self.add_move(moves, Move(self, origin, tile, kind="QUIET"))
                 if shift[shift[2]] > 0:
                     shift[shift[2]] += 1
                 else:
                     shift[shift[2]] -= 1
                 tile = board.find_tile(self.tile, shift[0], shift[1])
-        return moves
-
-            
-
-            
+        return moves      
 
 
 class Bishop(Piece):
@@ -96,17 +106,18 @@ class Bishop(Piece):
 
     def possible_moves(self, board): 
         moves = []
+        origin = board.get_tile(self.tile.file, self.tile.rank)
         shifts = [[1, 1], [-1, 1], [1, -1], [-1, -1]]
         for shift in shifts:
             tile = board.find_tile(self.tile, shift[0], shift[1])
             while tile != None:
                 if tile.piece != None:
                     if tile.piece.color != self.color:
-                        self.add_move(moves, tile)
+                        self.add_move(moves, Move(self, origin, tile, kind="CAPTURE"))
                         break
                     else:
                         break
-                self.add_move(moves, tile)
+                self.add_move(moves, Move(self, origin, tile, kind="QUIET"))
                 if shift[0] > 0:
                     shift[0] += 1
                 else:
@@ -136,12 +147,13 @@ class King(Piece):
 
     def possible_moves(self, board):
         moves = []
-        self.add_move(moves, board.find_tile(self.tile, 0, 1))
-        self.add_move(moves, board.find_tile(self.tile, 1, 1))
-        self.add_move(moves, board.find_tile(self.tile, 1, 0))
-        self.add_move(moves, board.find_tile(self.tile, 1, -1))
-        self.add_move(moves, board.find_tile(self.tile, 0, -1))
-        self.add_move(moves, board.find_tile(self.tile, -1, -1))
-        self.add_move(moves, board.find_tile(self.tile, -1, 0))
-        self.add_move(moves, board.find_tile(self.tile, -1, 1))
+        origin = board.get_tile(self.tile.file, self.tile.rank)
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 0, 1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 1, 1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 1, 0), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 1, -1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, 0, -1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, -1, -1), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, -1, 0), kind="UNKNOWN"))
+        self.add_move(moves, Move(self, origin, board.find_tile(self.tile, -1, 1), kind="UNKNOWN"))
         return moves

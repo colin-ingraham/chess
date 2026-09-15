@@ -1,16 +1,15 @@
 class Move:
-    def __init__(self, piece, origin, destination, kind, captured=None, captured_tile=None, promotion_type=None):
+    def __init__(self, piece, origin, destination, kind, captured=None, captured_index=None, captured_tile=None, promotion_type=None):
         self.piece = piece
         self.origin = origin
         self.destination = destination
         self.kind = kind
 
-
-
 class Capture(Move):
-    def __init__(self, piece, origin, destination, kind, captured, captured_tile, promotion_type=None):
+    def __init__(self, piece, origin, destination, kind, captured, captured_index, captured_tile, promotion_type=None):
         super().__init__(piece, origin, destination, kind)
         self.captured = captured
+        self.captured_index = captured_index
         self.captured_tile = captured_tile
 
 class Castle(Move):
