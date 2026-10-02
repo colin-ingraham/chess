@@ -36,16 +36,43 @@ class Game:
                 print("Stalemate draw! Game over.")
                 break
             
-            move = input(f"\nNext Move ({self.current_player.color}) {check_symbol} :: ")
-            if self.parse_move(move):
+            notation = input(f"\nNext Move ({self.current_player.color}) {check_symbol} :: ")
+            if self.parse_move(notation):
                 time.sleep(0.25)
                 self.board.print_board(self.graveyard, self.player1, self.player2)
                 self.current_player = self.player1 if self.player1 != self.current_player else self.player2
             else:
                 print("Move not available. Please try again.")
 
+    PIECE_LETTERS = {"N": "Knight", "R": "Rook", "B": "Bishop",
+                    "Q": "Queen", "K": "King"}
 
-    def parse_move(self, move):
+    def tokenize(self, notation):
+        if notation[0] in self.PIECE_LETTERS.keys(): # High piece movement
+            pass
+        elif notation[0].lower() == "o" or notation[0] == "0": # Castle
+            print("Castle not implemented.")
+        elif 
+
+            
+        
+        
+    def parse_move(self, notation, legal_moves=None):
+        name, square = self.tokenize(notation) # ("Pawn", "e4") / ("Knight", "f3")
+        if name is None:
+            return False
+        target = self.board.get_tile(square[0], int(square[1:]))
+        if target is None:
+            return False
+        if legal_moves is None:
+            legal_moves = self.generate_legal_moves(self.current_player.color)
+        matches = [m for m in legal_moves if m.piece.name == name and m.destination is target]
+        if len(matches) != 1:
+            return False # 0 = illegal, >1 = ambigious notation
+        self.apply_move(matches[0])
+        return True
+
+
         standing_tile = None
         if len(move) == 2: # Simple pawn movement
             target_tile = self.board.get_tile(move[0], int(move[1]))
@@ -87,10 +114,10 @@ class Game:
 
         
             
-    def move_piece(self, standing_tile, target_tile):
+    def move_piece(self, standing_tile, target_tile): # A deprecated function for moving a piece
         #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
         if target_tile.piece:
-            move = Capture(standing_tile.piece, standing_tile, target_tile, "CAPTURE", target_tile.piece, self.pieces.index(target_tile.piece), target_tile)
+            move = Move(standing_tile.piece, standing_tile, target_tile, "CAPTURE", target_tile.piece, self.pieces.index(target_tile.piece), target_tile)
         else:
             move = Move(standing_tile.piece, standing_tile, target_tile, "QUIET")
 
@@ -101,7 +128,20 @@ class Game:
         move.piece.update_position(move.destination)
         return move
 
-
+    def apply_move(self, move): # The preferred method for moving a piece.
+        target = move.destination.piece
+        if target is not None:
+            move.captured = target
+            move.captured_index = self.pieces.index(target)
+            move.captured_tile = move.destination
+            move.kind = CAPTURE
+        move.origin.remove_piece()
+        if move.captured is not None:
+            self.destroy_piece(move.captured)
+        move.destination.add_piece(move.piece)
+        move.piece.update_position(move.destination)
+        return move
+    
     def undo_move(self, move):
         """ This function reverts the movement previously made with the move_piece function"""
 
@@ -126,7 +166,7 @@ class Game:
         """ This function determines if a given tile is being attacked by a specific color."""
         for piece in self.pieces:
             if piece.color == by_color:
-                if tile in piece.possible_moves(self.board):
+                if any(m.destination is tile for m in piece.possible_moves(self.board)):
                     return True
         return False
 
@@ -141,17 +181,16 @@ class Game:
     def generate_legal_moves(self, color):
         """ This function returns the moves that doesn't leave color king in check. Determines checkmate"""
         legal_moves = []
-        for piece in self.pieces:
-            if piece.color == color:
-                for target in piece.possible_moves(self.board):
-                    move = self.move_piece(piece.tile, target)
-                    king_is_safe = not self.is_in_check(color)
-                    self.undo_move(move)
-                    if king_is_safe: 
-                        legal_moves.append(Move(piece=piece, origin=piece.tile, destination=target, kind="Unknown"))
+        for piece in list(self.pieces):
+            if piece.color != color:
+                continue
+            for candidate in piece.possible_moves(self.board):
+                self.apply_move(candidate)
+                king_is_safe = not self.is_in_check(color)
+                self.undo_move(candidate)
+                if king_is_safe:
+                    legal_moves.append(candidate)
         return legal_moves
-
-        
 
 
     # --- Board Setup --- #
