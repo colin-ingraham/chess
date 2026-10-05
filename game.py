@@ -48,18 +48,35 @@ class Game:
                     "Q": "Queen", "K": "King"}
 
     def tokenize(self, notation):
+        piece = None
+        tile = None
         if notation[0] in self.PIECE_LETTERS.keys(): # High piece movement
-            pass
+            piece = self.PIECE_LETTERS[notation[0]]
+            if notation[1] == "x":
+                tile = notation[2] + notation[3]
+                target = self.board.get_tile(tile[0], int(tile[1:]))
+                if target.piece == None:
+                    tile = None
+            else:
+                tile = notation[1] + notation[2]
+
         elif notation[0].lower() == "o" or notation[0] == "0": # Castle
             print("Castle not implemented.")
-        elif 
+        else: # Pawn movement
+            piece = "Pawn"
+            if notation[0] == "x":
+                tile = notation[1] + notation[2]
+                target = self.board.get_tile(tile[0], int(tile[1:]))
+                if target.piece == None:
+                    tile = None
+            else:
+                tile = notation[0] + notation[1]
 
-            
-        
+        return (piece, tile)
         
     def parse_move(self, notation, legal_moves=None):
         name, square = self.tokenize(notation) # ("Pawn", "e4") / ("Knight", "f3")
-        if name is None:
+        if name is None or square is None:
             return False
         target = self.board.get_tile(square[0], int(square[1:]))
         if target is None:
@@ -71,49 +88,7 @@ class Game:
             return False # 0 = illegal, >1 = ambigious notation
         self.apply_move(matches[0])
         return True
-
-
-        standing_tile = None
-        if len(move) == 2: # Simple pawn movement
-            target_tile = self.board.get_tile(move[0], int(move[1]))
-            for piece in self.pieces:
-                if isinstance(piece, Pawn) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
-                    standing_tile = piece.tile
-        elif len(move) == 3:
-            target_tile = self.board.get_tile(move[1], int(move[2]))
-            if move[0] == 'N':
-                for piece in self.pieces:
-                    if isinstance(piece, Knight) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
-                        standing_tile = piece.tile
-            elif move[0] == "R":
-                for piece in self.pieces:
-                    if isinstance(piece, Rook) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
-                        standing_tile = piece.tile
-            elif move[0] == "B":
-                for piece in self.pieces:
-                    if isinstance(piece, Bishop) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
-                        standing_tile = piece.tile
-            elif move[0] == "Q":
-                for piece in self.pieces:
-                    if isinstance(piece, Queen) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
-                        standing_tile = piece.tile
-            elif move[0] == "K":
-                for piece in self.pieces:
-                    if isinstance(piece, King) and target_tile in piece.possible_moves(self.board) and self.current_player.color == piece.color:
-                        standing_tile = piece.tile
-
-        if standing_tile:
-            move = self.move_piece(standing_tile, target_tile)
-            if self.is_in_check(self.current_player.color): # King is still in check after move
-                self.undo_move(move)
-                return False
-            else:
-                return True
-        else:
-            return False
-
-        
-            
+       
     def move_piece(self, standing_tile, target_tile): # A deprecated function for moving a piece
         #print(f"Moving from {standing_tile.file}{standing_tile.rank} to {target_tile.file}{target_tile.rank}")
         if target_tile.piece:
